@@ -345,7 +345,8 @@ MEMESEE_VERSION=v0.1.0
 服务器部署目录仍需保留 `db/init/`、`deploy/otel-collector.yml` 和
 `deploy/prometheus/`，因为基础设施容器会只读挂载这些配置。发布新版本或回滚时，
 修改 `MEMESEE_VERSION` 后在 1Panel 中执行拉取镜像并重建即可；生产环境不使用
-浮动的 `latest` 标签。
+浮动的 `latest` 标签。发布工作流同时生成 `linux/amd64` 和 `linux/arm64` 镜像，ARM64
+服务器应使用包含多架构 manifest 的版本标签。
 
 蓝绿部署、回滚、发布证据包和 post-launch 观察窗口相关脚本位于 `scripts/`，架构说明见：
 
