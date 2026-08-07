@@ -119,7 +119,7 @@ DEPLOY_VERIFY_MEDIA_URL=https://memesee.example/media/test.webp
     Assert-NotContains -Content $internalCommandText -Pattern $unexpected.Pattern -Description $unexpected.Description
   }
 
-  powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-production-launch.ps1 -FromEnvFile $envFile -InternalOnly -PrintCommand -OutputFile $auditFile | Out-Null
+  & $script:PowerShellExecutable -NoProfile -ExecutionPolicy Bypass -File scripts/verify-production-launch.ps1 -FromEnvFile $envFile -InternalOnly -PrintCommand -OutputFile $auditFile | Out-Null
   if (-not (Test-Path $auditFile)) {
     throw "launch verification command did not write OutputFile"
   }

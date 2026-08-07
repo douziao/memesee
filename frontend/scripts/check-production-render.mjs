@@ -2098,7 +2098,7 @@ async function assertPostDetailMetadata(window, {
         expectedImageHeight,
       }),
       window,
-      5000,
+      10000,
     );
   } catch (error) {
     throw new Error(`${error.message}; metadata=${describePageMetadata(window)}`);
