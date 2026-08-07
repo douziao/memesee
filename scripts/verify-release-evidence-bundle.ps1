@@ -1,4 +1,5 @@
 $ErrorActionPreference = "Stop"
+$script:PowerShellExecutable = if (Get-Command powershell -ErrorAction SilentlyContinue) { "powershell" } else { "pwsh" }
 
 function New-TempPath {
   param([string]$Extension)
@@ -291,7 +292,7 @@ try {
 
   Copy-Item -LiteralPath $bundleFile -Destination $tamperBundleFile -Force
   Add-Content -Path $deployFile -Value "tampered" -Encoding ascii
-  $tamperOutput = powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "write-release-evidence-bundle.ps1") -VerifyExisting -BundleFile $tamperBundleFile 2>$null
+  $tamperOutput = & $script:PowerShellExecutable -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "write-release-evidence-bundle.ps1") -VerifyExisting -BundleFile $tamperBundleFile 2>$null
   if ($LASTEXITCODE -eq 0) {
     throw "VerifyExisting must fail after an artifact is tampered"
   }
