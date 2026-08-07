@@ -27,6 +27,7 @@ function Assert-NotContains {
 $tempDirectory = [System.IO.Path]::GetTempPath()
 $envFile = Join-Path $tempDirectory "memesee-launch-config-$([guid]::NewGuid().ToString('N')).env"
 $auditFile = Join-Path $tempDirectory "memesee-launch-config-audit-$([guid]::NewGuid().ToString('N')).json"
+$script:PowerShellExecutable = if (Get-Command powershell -ErrorAction SilentlyContinue) { "powershell" } else { "pwsh" }
 
 try {
   @'
@@ -58,7 +59,7 @@ DEPLOY_VERIFY_HSTS_SKIP_CERTIFICATE_CHECK=true
 DEPLOY_VERIFY_MEDIA_URL=https://memesee.example/media/test.webp
 '@ | Set-Content -Path $envFile -NoNewline
 
-  $command = powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-production-launch.ps1 -FromEnvFile $envFile -GatewayUrl http://127.0.0.1:28888 -PrintCommand
+  $command = & $script:PowerShellExecutable -NoProfile -ExecutionPolicy Bypass -File scripts/verify-production-launch.ps1 -FromEnvFile $envFile -GatewayUrl http://127.0.0.1:28888 -PrintCommand
   $commandText = ($command -join "`n")
 
   foreach ($expectation in @(
@@ -93,7 +94,7 @@ DEPLOY_VERIFY_MEDIA_URL=https://memesee.example/media/test.webp
 
   Assert-NotContains -Content $commandText -Pattern "-VerifyOtelCollectorMetrics" -Description "disabled OTEL collector metric verification"
 
-  $internalCommand = powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-production-launch.ps1 -FromEnvFile $envFile -InternalOnly -PrintCommand
+  $internalCommand = & $script:PowerShellExecutable -NoProfile -ExecutionPolicy Bypass -File scripts/verify-production-launch.ps1 -FromEnvFile $envFile -InternalOnly -PrintCommand
   $internalCommandText = ($internalCommand -join "`n")
   foreach ($expectation in @(
     @{ Pattern = "-GatewayUrl http://127.0.0.1:18080"; Description = "internal gateway URL from env" },
