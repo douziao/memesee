@@ -99,13 +99,22 @@ function Invoke-RepoScript {
     [string]$Executable = "powershell"
   )
 
-  if ($Executable -eq "pwsh") {
+  $resolvedExecutable = $Executable
+  if (-not (Get-Command $resolvedExecutable -ErrorAction SilentlyContinue)) {
+    $fallbackExecutable = if ($resolvedExecutable -eq "powershell") { "pwsh" } else { "powershell" }
+    if (-not (Get-Command $fallbackExecutable -ErrorAction SilentlyContinue)) {
+      throw "Neither $resolvedExecutable nor $fallbackExecutable is available"
+    }
+    $resolvedExecutable = $fallbackExecutable
+  }
+
+  if ($resolvedExecutable -eq "pwsh") {
     & pwsh -NoProfile -File $Path @Arguments
   } else {
     & powershell -NoProfile -ExecutionPolicy Bypass -File $Path @Arguments
   }
   if ($LASTEXITCODE -ne 0) {
-    throw "$Executable $Path failed with exit code $LASTEXITCODE"
+    throw "$resolvedExecutable $Path failed with exit code $LASTEXITCODE"
   }
 }
 
@@ -273,10 +282,7 @@ try {
   }
 
   Invoke-OptionalOutputStep -Name "deploy bash syntax" -SkippedPattern "^deploy bash syntax skipped:" -Action {
-    & powershell -NoProfile -ExecutionPolicy Bypass -File "scripts/verify-deploy-bash-syntax.ps1"
-    if ($LASTEXITCODE -ne 0) {
-      throw "powershell scripts/verify-deploy-bash-syntax.ps1 failed with exit code $LASTEXITCODE"
-    }
+    Invoke-RepoScript -Path "scripts/verify-deploy-bash-syntax.ps1"
   }
 
   Invoke-Step -Name "powershell script syntax" -Action {
