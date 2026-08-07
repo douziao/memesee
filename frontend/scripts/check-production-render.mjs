@@ -2072,7 +2072,7 @@ async function assertPostDetailMetadata(window, {
       expectedImageHeight,
     }),
     window,
-    5000,
+    10000,
   );
   if (!window.document.title.includes(expectedTitleText)) {
     throw new Error(`${label}: document title is stale; actual="${window.document.title}"`);

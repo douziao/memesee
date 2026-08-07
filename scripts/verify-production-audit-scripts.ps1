@@ -68,7 +68,7 @@ function Convert-OutputToJson {
 
 function New-TempPath {
   param([string]$Extension)
-  return Join-Path $env:TEMP "memesee-audit-$([guid]::NewGuid().ToString('N'))$Extension"
+  return Join-Path $script:TempDirectory "memesee-audit-$([guid]::NewGuid().ToString('N'))$Extension"
 }
 
 function Invoke-AuditPlan {
@@ -111,6 +111,7 @@ $expectedAuditScripts = @(
   "rabbitmq-dlq.ps1",
   "rollback-bluegreen.ps1"
 )
+$script:TempDirectory = [System.IO.Path]::GetTempPath()
 $tempPaths = New-Object System.Collections.Generic.List[string]
 
 try {
@@ -167,7 +168,7 @@ try {
       param($ScriptPath, $AuditFile)
       & $ScriptPath `
         -EnvFile $deployEnvPath `
-        -GeneratedEnvDir $env:TEMP `
+        -GeneratedEnvDir $script:TempDirectory `
         -StateFile $deployStatePath `
         -TargetColor green `
         -ActiveColor blue `
