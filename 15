@@ -1,0 +1,15 @@
+{
+    "Action":  "ProductionPostLaunchMonitoringPlan",
+    "DryRun":  true,
+    "EnvFile":  "C:\\Users\\nya\\VSCodeProjects\\memesee\\deploy\\.env.production.example",
+    "GeneratedAt":  "2026-06-08T14:09:42.3851329Z",
+    "WindowMinutes":  [
+                          0
+                      ],
+    "InspectDlq":  false,
+    "DlqInspectCount":  5,
+    "FailFast":  false,
+    "WouldRunLaunchVerification":  true,
+    "WouldInspectDlq":  false,
+    "OutputFile":  "15"
+}

@@ -1,0 +1,303 @@
+/* 中央内容流 */
+.feed {
+  min-width: 0;
+  overflow: visible;
+  padding-right: 0;
+}
+
+/* 主帖列表采用单列信息流 */
+.feed-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 24px;
+}
+
+.post-list-flow {
+  display: contents;
+}
+
+.post-list-flow.is-refreshing .post-card {
+  opacity: 0.72;
+  transition: opacity 0.16s ease;
+}
+
+.feed-status-card {
+  --feed-status-ink: #2f241b;
+  --feed-status-muted: rgba(47, 36, 27, 0.66);
+  --feed-status-line: rgba(47, 36, 27, 0.68);
+  --feed-status-paper: #fffdf0;
+  --feed-status-warm: #fff7d7;
+  --feed-status-red: #ad3b32;
+  --feed-status-teal: #147a7d;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 8px;
+  min-height: 148px;
+  align-content: center;
+  padding: 24px 24px 22px 28px;
+  border: 2px solid var(--feed-status-line);
+  border-radius: 14px;
+  color: var(--feed-status-ink);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 50%),
+    radial-gradient(circle, rgba(47, 36, 27, 0.12) 1px, transparent 1.2px) 0 0 / 18px 18px,
+    var(--feed-status-paper);
+  box-shadow:
+    4px 5px 0 rgba(47, 36, 27, 0.16),
+    8px 9px 0 rgba(20, 122, 125, 0.08);
+  animation: fadeInUp 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) both;
+}
+
+.feed-status-card::before {
+  content: "";
+  position: absolute;
+  top: 20px;
+  left: 0;
+  width: 6px;
+  height: 64px;
+  border-right: 2px solid var(--feed-status-line);
+  border-radius: 0 999px 999px 0;
+  background: var(--feed-status-red);
+}
+
+.feed-status-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(47, 36, 27, 0.026) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(47, 36, 27, 0.018) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.34;
+  mix-blend-mode: multiply;
+}
+
+.feed-status-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.feed-status-kicker {
+  width: fit-content;
+  max-width: 100%;
+  color: var(--feed-status-muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+
+.feed-status-mainline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.feed-status-mark {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--feed-status-line);
+  border-radius: 5px;
+  background:
+    linear-gradient(135deg, var(--accent) 0 48%, var(--feed-status-teal) 48% 100%);
+  box-shadow: 3px 3px 0 rgba(47, 36, 27, 0.12);
+  transform: rotate(-4deg);
+}
+
+.feed-status-card strong {
+  max-width: 520px;
+  font-size: 1.08rem;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.feed-status-subtext {
+  max-width: 560px;
+  color: var(--feed-status-muted);
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.feed-status-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 4px;
+}
+
+.feed-status-dots i {
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--feed-status-line);
+  border-radius: 999px;
+  background: var(--feed-status-teal);
+  animation: feed-status-pulse 0.9s ease-in-out infinite;
+}
+
+.feed-status-dots i:nth-child(2) {
+  animation-delay: 0.12s;
+  background: var(--accent);
+}
+
+.feed-status-dots i:nth-child(3) {
+  animation-delay: 0.24s;
+  background: var(--feed-status-red);
+}
+
+.feed-status-card .btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-start;
+  margin-top: 10px;
+}
+
+.feed-status-card .neo-btn {
+  max-width: 100%;
+  border: 2px solid var(--feed-status-line);
+  border-radius: 999px;
+  background: var(--feed-status-warm);
+  color: var(--feed-status-ink);
+  white-space: normal;
+  box-shadow: 3px 3px 0 rgba(47, 36, 27, 0.14);
+}
+
+.feed-status-card .neo-btn:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 rgba(47, 36, 27, 0.16);
+}
+
+.feed-status-card .neo-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+  transform: none;
+  box-shadow: 2px 2px 0 rgba(47, 36, 27, 0.1);
+}
+
+@keyframes feed-status-pulse {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.58;
+  }
+  50% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.feed-search-bar {
+  margin-bottom: 14px;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  position: static;
+  background: transparent;
+}
+
+.feed-search-main {
+  display: block;
+}
+
+.feed-search-main-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.feed-search-input-shell {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.feed-search-input {
+  width: 100%;
+  min-width: 0;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 10px 64px 10px 12px;
+}
+
+.feed-search-inline-actions {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.feed-search-btn {
+  border: 0;
+  background: transparent;
+  color: #333;
+  font-weight: 800;
+  padding: 6px 2px;
+  cursor: pointer;
+}
+
+.feed-search-btn:hover {
+  color: #111;
+  text-decoration: underline;
+}
+
+.feed-load-more {
+  width: fit-content;
+  min-height: 40px;
+  margin: 2px auto 0;
+  padding: 8px 16px;
+  border: 1px dashed rgba(47, 36, 27, 0.26);
+  border-radius: 999px;
+  background: rgba(255, 247, 215, 0.58);
+  text-align: center;
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: rgba(47, 36, 27, 0.62);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  max-width: min(100%, 560px);
+}
+
+.feed-load-more.is-error {
+  border-style: solid;
+  background: rgba(255, 238, 214, 0.82);
+  color: rgba(97, 48, 20, 0.82);
+}
+
+@media (max-width: 640px) {
+  .feed-status-card {
+    min-height: 132px;
+    padding: 20px 18px 18px 24px;
+  }
+
+  .feed-status-card strong {
+    font-size: 1rem;
+  }
+
+  .feed-status-card .btn-group {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .feed-status-card .neo-btn {
+    justify-content: center;
+    width: 100%;
+    min-height: 42px;
+    text-align: center;
+  }
+}

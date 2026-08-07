@@ -1,0 +1,95 @@
+{
+  "title": "Memesee Database Hotspots",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "tags": ["memesee", "database", "hotspots"],
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Projection Query P95",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (projection, operation, le) (rate(memesee_projection_query_duration_seconds_bucket[5m])))",
+          "legendFormat": "{{projection}} {{operation}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Projection Slow Query Rate",
+      "targets": [
+        {
+          "expr": "sum by (projection, operation) (rate(memesee_projection_query_slow_total[10m]))",
+          "legendFormat": "{{projection}} {{operation}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Hikari Active Connections",
+      "targets": [
+        {
+          "expr": "hikaricp_connections_active{job=~\"memesee-(user|content)-service\"}",
+          "legendFormat": "{{job}} {{pool}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Hikari Pending Connections",
+      "targets": [
+        {
+          "expr": "hikaricp_connections_pending{job=~\"memesee-(user|content)-service\"}",
+          "legendFormat": "{{job}} {{pool}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
+    },
+    {
+      "id": 5,
+      "type": "table",
+      "title": "Top Projection Query Volume",
+      "targets": [
+        {
+          "expr": "topk(10, sum by (projection, operation, outcome) (rate(memesee_projection_query_duration_seconds_count[5m])))",
+          "legendFormat": "{{projection}} {{operation}} {{outcome}}",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 }
+    }
+  ]
+}

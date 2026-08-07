@@ -1,0 +1,95 @@
+{
+  "title": "Memesee Content Commands",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "tags": ["memesee", "content", "commands"],
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Content Command Rate",
+      "targets": [
+        {
+          "expr": "sum by (aggregate, operation, outcome) (rate(memesee_content_command_total[5m]))",
+          "legendFormat": "{{aggregate}} {{operation}} {{outcome}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Content Command P95 Duration",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (aggregate, operation, le) (rate(memesee_content_command_duration_seconds_bucket[5m])))",
+          "legendFormat": "{{aggregate}} {{operation}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Content Command Error Ratio",
+      "targets": [
+        {
+          "expr": "sum by (aggregate, operation) (rate(memesee_content_command_total{outcome=\"error\"}[5m])) / clamp_min(sum by (aggregate, operation) (rate(memesee_content_command_total[5m])), 0.001)",
+          "legendFormat": "{{aggregate}} {{operation}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Content Command Volume By Mode",
+      "targets": [
+        {
+          "expr": "sum by (aggregate, operation, postMode) (rate(memesee_content_command_total[5m]))",
+          "legendFormat": "{{aggregate}} {{operation}} {{postMode}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
+    },
+    {
+      "id": 5,
+      "type": "table",
+      "title": "Top Content Command Outcomes",
+      "targets": [
+        {
+          "expr": "topk(10, sum by (aggregate, operation, outcome, postMode) (rate(memesee_content_command_total[5m])))",
+          "legendFormat": "{{aggregate}} {{operation}} {{outcome}} {{postMode}}",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 }
+    }
+  ]
+}

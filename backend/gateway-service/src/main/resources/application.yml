@@ -1,0 +1,133 @@
+debug: false
+
+server:
+  port: 8080
+  forward-headers-strategy: framework
+  shutdown: graceful
+  compression:
+    enabled: true
+    min-response-size: 1KB
+    mime-types: application/json,text/plain,text/html,text/css,application/javascript,text/javascript,application/xml,image/svg+xml
+
+spring:
+  application:
+    name: gateway-service
+  lifecycle:
+    timeout-per-shutdown-phase: ${GATEWAY_SHUTDOWN_TIMEOUT:20s}
+  codec:
+    max-in-memory-size: 350MB
+  cloud:
+    gateway:
+      httpclient:
+        connect-timeout: ${GATEWAY_HTTPCLIENT_CONNECT_TIMEOUT_MS:3000}
+        response-timeout: ${GATEWAY_HTTPCLIENT_RESPONSE_TIMEOUT:30s}
+      default-filters:
+        - name: Retry
+          args:
+            retries: ${GATEWAY_RETRY_RETRIES:1}
+            statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE,GATEWAY_TIMEOUT
+            methods: GET
+            backoff:
+              firstBackoff: ${GATEWAY_RETRY_FIRST_BACKOFF:50ms}
+              maxBackoff: ${GATEWAY_RETRY_MAX_BACKOFF:250ms}
+              factor: ${GATEWAY_RETRY_BACKOFF_FACTOR:2}
+              basedOnPreviousValue: false
+        - name: CircuitBreaker
+          args:
+            name: memeseeDownstream
+            fallbackUri: forward:/__gateway/fallback
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns:
+              - ${FRONTEND_ORIGIN:http://localhost:5173}
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+      routes:
+        - id: user-service
+          uri: ${USER_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/users/**
+        - id: content-service-communities
+          uri: ${CONTENT_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/communities/**
+        - id: content-service-main-posts
+          uri: ${CONTENT_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/main-posts/**
+        - id: content-service-share-posts
+          uri: ${CONTENT_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/share/posts/**
+        - id: content-service-feed
+          uri: ${CONTENT_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/feed,/api/feed/**
+        - id: content-service-sub-posts
+          uri: ${CONTENT_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/sub-posts/**
+        - id: content-service-media-assets
+          uri: ${CONTENT_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/media-assets/**
+        - id: content-service-notifications
+          uri: ${CONTENT_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/notifications/**
+        - id: content-service-me
+          uri: ${CONTENT_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/me/**
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level gateway-service [%thread] requestId=%X{requestId:-none} traceId=%X{traceId:-none} %logger{36} - %msg%n"
+  level:
+    org.springframework.cloud.gateway: INFO
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      memeseeDownstream:
+        sliding-window-size: ${GATEWAY_CIRCUIT_BREAKER_SLIDING_WINDOW_SIZE:50}
+        minimum-number-of-calls: ${GATEWAY_CIRCUIT_BREAKER_MINIMUM_CALLS:10}
+        failure-rate-threshold: ${GATEWAY_CIRCUIT_BREAKER_FAILURE_RATE_THRESHOLD:50}
+        wait-duration-in-open-state: ${GATEWAY_CIRCUIT_BREAKER_OPEN_STATE_WAIT:10s}
+        permitted-number-of-calls-in-half-open-state: ${GATEWAY_CIRCUIT_BREAKER_HALF_OPEN_CALLS:5}
+  timelimiter:
+    instances:
+      memeseeDownstream:
+        timeout-duration: ${GATEWAY_CIRCUIT_BREAKER_TIMEOUT:5s}
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  tracing:
+    enabled: ${MANAGEMENT_TRACING_ENABLED:true}
+    sampling:
+      probability: ${MANAGEMENT_TRACING_SAMPLING_PROBABILITY:0.1}
+  otlp:
+    tracing:
+      endpoint: ${MANAGEMENT_OTLP_TRACING_ENDPOINT:http://localhost:4318/v1/traces}
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      slo:
+        http.server.requests: 50ms,100ms,250ms,500ms,1s,2s,5s
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus

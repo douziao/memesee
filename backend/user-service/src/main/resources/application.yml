@@ -1,0 +1,84 @@
+debug: false
+
+server:
+  port: 8081
+  forward-headers-strategy: framework
+  shutdown: graceful
+  compression:
+    enabled: true
+    min-response-size: 1KB
+    mime-types: application/json,text/plain,text/html,text/css,application/javascript,text/javascript,application/xml,image/svg+xml
+
+spring:
+  application:
+    name: user-service
+  lifecycle:
+    timeout-per-shutdown-phase: ${USER_SHUTDOWN_TIMEOUT:20s}
+  datasource:
+    url: ${USER_DB_URL:jdbc:mysql://127.0.0.1:3307/memesee_user?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${USER_DB_USERNAME:memesee_app}
+    password: ${USER_DB_PASSWORD:memesee_app_password}
+    hikari:
+      maximum-pool-size: ${USER_DB_POOL_MAX_SIZE:10}
+      minimum-idle: ${USER_DB_POOL_MIN_IDLE:2}
+      connection-timeout: ${USER_DB_POOL_CONNECTION_TIMEOUT_MS:3000}
+      validation-timeout: ${USER_DB_POOL_VALIDATION_TIMEOUT_MS:1000}
+      idle-timeout: ${USER_DB_POOL_IDLE_TIMEOUT_MS:600000}
+      max-lifetime: ${USER_DB_POOL_MAX_LIFETIME_MS:1800000}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 1
+  jackson:
+    time-zone: UTC
+
+app:
+  security:
+    jwt:
+      secret: ${APP_SECURITY_JWT_SECRET:${JWT_SECRET:change_me_to_a_long_secret_at_least_32_chars}}
+      expiration-seconds: ${APP_SECURITY_JWT_EXPIRATION_SECONDS:${JWT_EXPIRATION_SECONDS:86400}}
+    internal:
+      service-token: ${APP_SECURITY_INTERNAL_SERVICE_TOKEN:${USER_INTERNAL_SERVICE_TOKEN:change_me_internal_service_token}}
+  internal:
+    service-token: ${APP_SECURITY_INTERNAL_SERVICE_TOKEN:${USER_INTERNAL_SERVICE_TOKEN:change_me_internal_service_token}}
+  progress:
+    recent-created-posts: ${APP_PROGRESS_RECENT_CREATED_POSTS:0}
+    recent-created-posts-window-days: ${APP_PROGRESS_RECENT_CREATED_POSTS_WINDOW_DAYS:100}
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level user-service [%thread] requestId=%X{requestId:-none} traceId=%X{traceId:-none} %logger{36} - %msg%n"
+  level:
+    org.hibernate.SQL: WARN
+    org.hibernate.orm.jdbc.bind: WARN
+    org.hibernate.orm.results: WARN
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  tracing:
+    enabled: ${MANAGEMENT_TRACING_ENABLED:true}
+    sampling:
+      probability: ${MANAGEMENT_TRACING_SAMPLING_PROBABILITY:0.1}
+  otlp:
+    tracing:
+      endpoint: ${MANAGEMENT_OTLP_TRACING_ENDPOINT:http://localhost:4318/v1/traces}
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      slo:
+        http.server.requests: 50ms,100ms,250ms,500ms,1s,2s,5s
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus

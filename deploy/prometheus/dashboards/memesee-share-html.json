@@ -1,0 +1,95 @@
+{
+  "title": "Memesee Share HTML",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "tags": ["memesee", "share", "crawler"],
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Share HTML Render Rate",
+      "targets": [
+        {
+          "expr": "sum by (target, outcome, image) (rate(memesee_share_html_render_total[5m]))",
+          "legendFormat": "{{target}} {{outcome}} {{image}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Share HTML P95 Duration",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (target, outcome, le) (rate(memesee_share_html_render_duration_seconds_bucket[5m])))",
+          "legendFormat": "{{target}} {{outcome}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Default Image Fallback Ratio",
+      "targets": [
+        {
+          "expr": "sum(rate(memesee_share_html_render_total{image=\"default\"}[15m])) / clamp_min(sum(rate(memesee_share_html_render_total[15m])), 0.001)",
+          "legendFormat": "default image ratio"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Sub-post Fallback Ratio",
+      "targets": [
+        {
+          "expr": "sum(rate(memesee_share_html_render_total{outcome=~\"invalid_sub_post_query|sub_post_not_found|sub_post_cross_post\"}[15m])) / clamp_min(sum(rate(memesee_share_html_render_total[15m])), 0.001)",
+          "legendFormat": "sub-post fallback ratio"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
+    },
+    {
+      "id": 5,
+      "type": "table",
+      "title": "Top Share HTML Outcomes",
+      "targets": [
+        {
+          "expr": "topk(10, sum by (target, outcome, image) (rate(memesee_share_html_render_total[5m])))",
+          "legendFormat": "{{target}} {{outcome}} {{image}}",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 }
+    }
+  ]
+}

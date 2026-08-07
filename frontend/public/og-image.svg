@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">MemeSee</title>
+  <desc id="desc">MemeSee community sharing card</desc>
+  <rect width="1200" height="630" fill="#f8fafc"/>
+  <rect x="72" y="72" width="1056" height="486" rx="36" fill="#ffffff" stroke="#d9e2ec" stroke-width="2"/>
+  <circle cx="178" cy="176" r="50" fill="#111827"/>
+  <path d="M155 178c0-20 16-36 36-36h26v36c0 20-16 36-36 36h-26z" fill="#ffffff"/>
+  <text x="248" y="192" fill="#111827" font-family="Inter, Arial, sans-serif" font-size="72" font-weight="800">MemeSee</text>
+  <text x="96" y="338" fill="#1f2937" font-family="Inter, Arial, sans-serif" font-size="46" font-weight="700">Community posts, media, and discussion</text>
+  <text x="96" y="420" fill="#475569" font-family="Inter, Arial, sans-serif" font-size="30">A lightweight social content space built for focused sharing.</text>
+  <rect x="96" y="478" width="170" height="48" rx="24" fill="#111827"/>
+  <text x="128" y="511" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700">memesee</text>
+  <rect x="842" y="384" width="252" height="38" rx="8" fill="#eef2ff"/>
+  <rect x="842" y="438" width="198" height="38" rx="8" fill="#dcfce7"/>
+  <rect x="842" y="492" width="228" height="38" rx="8" fill="#fef3c7"/>
+</svg>

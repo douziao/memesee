@@ -1,0 +1,177 @@
+groups:
+  - name: memesee-runtime
+    rules:
+      - alert: MemeseeTargetDown
+        expr: up{job=~"memesee-.*"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.job }} is down"
+          description: "Prometheus cannot scrape {{ $labels.job }} at {{ $labels.instance }}."
+
+      - alert: MemeseeApiP95High
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (job, le) (
+              rate(http_server_requests_seconds_bucket{job=~"memesee-.*",uri!~"/actuator.*"}[5m])
+            )
+          ) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.job }} API p95 latency is high"
+          description: "{{ $labels.job }} p95 latency has been above 500ms for 10 minutes."
+
+      - alert: MemeseeApi5xxRateHigh
+        expr: |
+          (
+            sum by (job) (rate(http_server_requests_seconds_count{job=~"memesee-.*",status=~"5.."}[5m]))
+            /
+            clamp_min(sum by (job) (rate(http_server_requests_seconds_count{job=~"memesee-.*"}[5m])), 0.001)
+          ) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.job }} 5xx rate is high"
+          description: "{{ $labels.job }} 5xx response ratio has been above 5% for 10 minutes."
+
+      - alert: MemeseeCacheHitRateLow
+        expr: |
+          (
+            sum by (cache) (rate(memesee_cache_operations_total{operation="hit"}[10m]))
+            /
+            clamp_min(
+              sum by (cache) (rate(memesee_cache_operations_total{operation=~"hit|miss"}[10m])),
+              0.001
+            )
+          ) < 0.6
+          and
+          sum by (cache) (rate(memesee_cache_operations_total{operation=~"hit|miss"}[10m])) > 0.05
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.cache }} cache hit rate is low"
+          description: "{{ $labels.cache }} cache hit rate has been below 60% for 15 minutes while receiving cache traffic."
+
+      - alert: MemeseeProjectionQuerySlow
+        expr: |
+          sum by (projection, operation) (
+            rate(memesee_projection_query_slow_total[10m])
+          ) > 0.05
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.projection }} {{ $labels.operation }} projection query is slow"
+          description: "{{ $labels.projection }} {{ $labels.operation }} has produced sustained slow query samples for 15 minutes."
+
+      - alert: MemeseeContentCommandErrorRateHigh
+        expr: |
+          (
+            sum by (aggregate, operation) (
+              rate(memesee_content_command_total{outcome="error"}[5m])
+            )
+            /
+            clamp_min(
+              sum by (aggregate, operation) (
+                rate(memesee_content_command_total[5m])
+              ),
+              0.001
+            )
+          ) > 0.05
+          and
+          sum by (aggregate, operation) (
+            rate(memesee_content_command_total[5m])
+          ) > 0.01
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.aggregate }} {{ $labels.operation }} command errors are elevated"
+          description: "{{ $labels.aggregate }} {{ $labels.operation }} command error ratio has been above 5% for 10 minutes while receiving command traffic."
+
+      - alert: MemeseeContentCommandP95High
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (aggregate, operation, le) (
+              rate(memesee_content_command_duration_seconds_bucket[5m])
+            )
+          ) > 1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.aggregate }} {{ $labels.operation }} command p95 latency is high"
+          description: "{{ $labels.aggregate }} {{ $labels.operation }} command p95 latency has been above 1s for 10 minutes."
+
+      - alert: MemeseeMediaWorkerNotReady
+        expr: memesee_media_worker_ready == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Media worker is not ready"
+          description: "The media worker is reachable but has not been ready to consume messages for 5 minutes."
+
+      - alert: MemeseeMediaWorkerFailures
+        expr: rate(memesee_media_worker_failed_total[10m]) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Media worker failures are elevated"
+          description: "The media worker has produced sustained media processing failures for 10 minutes."
+
+      - alert: MemeseeShareHtmlRenderErrors
+        expr: |
+          (
+            sum(rate(memesee_share_html_render_total{outcome="error"}[5m]))
+            /
+            clamp_min(sum(rate(memesee_share_html_render_total[5m])), 0.001)
+          ) > 0.02
+          and
+          sum(rate(memesee_share_html_render_total[5m])) > 0.01
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Share HTML render errors are elevated"
+          description: "Share HTML render error ratio has been above 2% for 10 minutes while receiving share crawler traffic."
+
+      - alert: MemeseeShareHtmlDefaultImageFallbackHigh
+        expr: |
+          (
+            sum(rate(memesee_share_html_render_total{image="default"}[15m]))
+            /
+            clamp_min(sum(rate(memesee_share_html_render_total[15m])), 0.001)
+          ) > 0.5
+          and
+          sum(rate(memesee_share_html_render_total[15m])) > 0.01
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Share HTML default image fallback is high"
+          description: "More than half of share HTML renders have used the default OG image for 30 minutes."
+
+      - alert: MemeseeShareHtmlSubPostFallbackHigh
+        expr: |
+          (
+            sum(rate(memesee_share_html_render_total{outcome=~"invalid_sub_post_query|sub_post_not_found|sub_post_cross_post"}[15m]))
+            /
+            clamp_min(sum(rate(memesee_share_html_render_total[15m])), 0.001)
+          ) > 0.2
+          and
+          sum(rate(memesee_share_html_render_total[15m])) > 0.01
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Share HTML sub-post fallback is high"
+          description: "Sub-post share links are frequently falling back to main-post previews; check stale or malformed subPost links."

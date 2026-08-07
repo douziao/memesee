@@ -1,0 +1,70 @@
+.forum-app {
+  width: min(1400px, 100%);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+}
+
+/* 三栏主布局 */
+.forum-grid {
+  display: grid;
+  grid-template-columns: var(--rail-width) 1fr var(--rail-width);
+  gap: 24px;
+  align-items: start;
+  overflow: visible;
+}
+
+/* 侧栏吸顶容器 */
+.sticky-panel {
+  position: sticky;
+  top: var(--sticky-offset);
+}
+
+.right-rail {
+  display: grid;
+  gap: 14px;
+}
+
+/* 布局细节微调 */
+.forum-app {
+  padding: 18px;
+}
+
+.forum-grid {
+  gap: 20px;
+}
+
+.left-rail,
+.right-rail {
+  display: grid;
+  gap: 12px;
+}
+
+.left-rail .neo-card {
+  padding: 18px;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+@media (min-width: 1101px) {
+  .left-rail,
+  .right-rail {
+    position: sticky;
+    top: var(--sticky-offset);
+    align-self: start;
+    max-height: calc(100vh - var(--sticky-offset) - 12px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    width: var(--rail-width);
+  }
+
+  .left-rail .sticky-panel {
+    position: static;
+    top: auto;
+  }
+}

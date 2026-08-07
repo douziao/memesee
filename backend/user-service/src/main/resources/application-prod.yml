@@ -1,0 +1,17 @@
+debug: false
+
+spring:
+  datasource:
+    url: ${USER_DB_URL}
+    username: ${USER_DB_USERNAME}
+    password: ${USER_DB_PASSWORD}
+
+app:
+  security:
+    jwt:
+      secret: ${APP_SECURITY_JWT_SECRET}
+      expiration-seconds: ${APP_SECURITY_JWT_EXPIRATION_SECONDS:86400}
+    internal:
+      service-token: ${APP_SECURITY_INTERNAL_SERVICE_TOKEN}
+  internal:
+    service-token: ${APP_SECURITY_INTERNAL_SERVICE_TOKEN}

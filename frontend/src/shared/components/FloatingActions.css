@@ -1,0 +1,155 @@
+.floating-actions {
+  position: fixed;
+  right: 14px;
+  bottom: 84px;
+  z-index: 70;
+  display: grid;
+  gap: 9px;
+}
+
+.floating-action-btn {
+  --floating-ink: #2f241b;
+  --floating-paper: #fff7d7;
+  --floating-yellow: #f2d66a;
+  --floating-teal: #147a7d;
+  --floating-red: #ad3b32;
+  position: relative;
+  isolation: isolate;
+  border: 2px solid rgba(47, 36, 27, 0.72);
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.52), transparent 42%),
+    var(--floating-paper);
+  color: var(--floating-ink);
+  box-shadow:
+    3px 3px 0 rgba(47, 36, 27, 0.16),
+    0 8px 18px rgba(47, 36, 27, 0.08);
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  font-weight: 950;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: floating-pop-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.floating-action-btn::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 7px;
+  z-index: -1;
+  height: 5px;
+  border-radius: 999px 18px 999px 12px;
+  background: rgba(242, 214, 106, 0.62);
+  transform: rotate(-1deg);
+  pointer-events: none;
+}
+
+.floating-action-btn .ui-icon {
+  width: 20px;
+  height: 20px;
+  filter: drop-shadow(1px 1px 0 rgba(255, 253, 240, 0.74));
+}
+
+.floating-action-btn.arrow {
+  animation-delay: 0.1s;
+}
+
+.floating-action-btn.refresh {
+  color: var(--floating-teal);
+  animation-delay: 0s;
+}
+
+.floating-action-btn.refresh::after {
+  background: rgba(20, 122, 125, 0.22);
+}
+
+.floating-action-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.66), transparent 42%),
+    #fffdf0;
+  box-shadow:
+    4px 4px 0 rgba(47, 36, 27, 0.18),
+    0 10px 22px rgba(47, 36, 27, 0.1);
+}
+
+.floating-action-btn.refresh:hover:not(:disabled) {
+  border-color: rgba(20, 122, 125, 0.78);
+}
+
+.floating-action-btn.arrow:hover:not(:disabled) {
+  border-color: rgba(173, 59, 50, 0.62);
+  color: var(--floating-red);
+}
+
+.floating-action-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow:
+    2px 2px 0 rgba(47, 36, 27, 0.14),
+    0 6px 14px rgba(47, 36, 27, 0.08);
+}
+
+.floating-action-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.floating-action-btn:disabled .ui-icon {
+  animation: floating-refresh-spin 0.9s linear infinite;
+}
+
+@keyframes floating-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.92) rotate(1deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0);
+  }
+}
+
+@keyframes floating-refresh-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (min-width: 1101px) {
+  .floating-actions {
+    right: calc(
+      (100vw - min(1400px, 100vw)) / 2 + (var(--rail-width) / 2) - 4px
+    );
+  }
+}
+
+@media (max-width: 768px) {
+  .floating-actions {
+    right: 10px;
+    bottom: 74px;
+    gap: 8px;
+  }
+
+  .floating-action-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+  }
+
+  .floating-action-btn .ui-icon {
+    width: 19px;
+    height: 19px;
+  }
+}

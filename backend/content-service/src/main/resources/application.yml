@@ -1,0 +1,145 @@
+debug: false
+
+server:
+  port: 8083
+  forward-headers-strategy: framework
+  shutdown: graceful
+  compression:
+    enabled: true
+    min-response-size: 1KB
+    mime-types: application/json,text/plain,text/html,text/css,application/javascript,text/javascript,application/xml,image/svg+xml
+
+spring:
+  application:
+    name: content-service
+  lifecycle:
+    timeout-per-shutdown-phase: ${CONTENT_SHUTDOWN_TIMEOUT:20s}
+  datasource:
+    url: ${CONTENT_DB_URL:jdbc:mysql://127.0.0.1:3307/memesee_content?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${CONTENT_DB_USERNAME:memesee_app}
+    password: ${CONTENT_DB_PASSWORD:memesee_app_password}
+    hikari:
+      maximum-pool-size: ${CONTENT_DB_POOL_MAX_SIZE:20}
+      minimum-idle: ${CONTENT_DB_POOL_MIN_IDLE:5}
+      connection-timeout: ${CONTENT_DB_POOL_CONNECTION_TIMEOUT_MS:3000}
+      validation-timeout: ${CONTENT_DB_POOL_VALIDATION_TIMEOUT_MS:1000}
+      idle-timeout: ${CONTENT_DB_POOL_IDLE_TIMEOUT_MS:600000}
+      max-lifetime: ${CONTENT_DB_POOL_MAX_LIFETIME_MS:1800000}
+  servlet:
+    multipart:
+      max-file-size: 300MB
+      max-request-size: 320MB
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+  jackson:
+    time-zone: UTC
+  data:
+    redis:
+      host: ${MEMESEE_REDIS_HOST:127.0.0.1}
+      port: ${MEMESEE_REDIS_PORT:6379}
+      username: ${MEMESEE_REDIS_USERNAME:}
+      password: ${MEMESEE_REDIS_PASSWORD:}
+      database: ${MEMESEE_REDIS_DATABASE:0}
+      timeout: ${MEMESEE_REDIS_TIMEOUT:3s}
+      connect-timeout: ${MEMESEE_REDIS_CONNECT_TIMEOUT:3s}
+      ssl:
+        enabled: ${MEMESEE_REDIS_SSL_ENABLED:false}
+  rabbitmq:
+    host: ${MEMESEE_RABBITMQ_HOST:127.0.0.1}
+    port: ${MEMESEE_RABBITMQ_PORT:5672}
+    username: ${MEMESEE_RABBITMQ_USERNAME:memesee}
+    password: ${MEMESEE_RABBITMQ_PASSWORD:memesee_password}
+    virtual-host: ${MEMESEE_RABBITMQ_VHOST:/}
+app:
+  user-service:
+    url: ${USER_SERVICE_URL:http://127.0.0.1:8081}
+  observability:
+    projection-query:
+      slow-threshold: ${CONTENT_PROJECTION_QUERY_SLOW_THRESHOLD:250ms}
+  security:
+    jwt:
+      secret: ${APP_SECURITY_JWT_SECRET:${JWT_SECRET:change_me_to_a_long_secret_at_least_32_chars}}
+    internal:
+      service-token: ${APP_SECURITY_INTERNAL_SERVICE_TOKEN:${USER_INTERNAL_SERVICE_TOKEN:change_me_internal_service_token}}
+  outbox:
+    processor:
+      enabled: ${CONTENT_OUTBOX_PROCESSOR_ENABLED:true}
+      batch-size: ${CONTENT_OUTBOX_PROCESSOR_BATCH_SIZE:20}
+      fixed-delay-ms: ${CONTENT_OUTBOX_PROCESSOR_DELAY_MS:5000}
+      failed-retry:
+        enabled: ${CONTENT_OUTBOX_FAILED_RETRY_ENABLED:true}
+        batch-size: ${CONTENT_OUTBOX_FAILED_RETRY_BATCH_SIZE:20}
+        max-attempts: ${CONTENT_OUTBOX_FAILED_RETRY_MAX_ATTEMPTS:5}
+        delay: ${CONTENT_OUTBOX_FAILED_RETRY_DELAY:PT10S}
+      distributed-lock:
+        enabled: ${CONTENT_OUTBOX_PROCESSOR_DISTRIBUTED_LOCK_ENABLED:false}
+        key: ${CONTENT_OUTBOX_PROCESSOR_DISTRIBUTED_LOCK_KEY:memesee:lock:content:outbox:processor}
+        wait-time: ${CONTENT_OUTBOX_PROCESSOR_DISTRIBUTED_LOCK_WAIT_TIME:PT0S}
+        lease-time: ${CONTENT_OUTBOX_PROCESSOR_DISTRIBUTED_LOCK_LEASE_TIME:PT30S}
+        fail-open: ${CONTENT_OUTBOX_PROCESSOR_DISTRIBUTED_LOCK_FAIL_OPEN:false}
+  search:
+    meilisearch:
+      url: ${CONTENT_SEARCH_MEILISEARCH_URL:http://127.0.0.1:7700}
+      api-key: ${CONTENT_SEARCH_MEILISEARCH_API_KEY:memesee_master_key}
+      index-uid: ${CONTENT_SEARCH_MEILISEARCH_INDEX_UID:main-posts}
+  media:
+    processing:
+      async-enabled: ${CONTENT_MEDIA_PROCESSING_ASYNC_ENABLED:false}
+      queue:
+        exchange: ${CONTENT_MEDIA_PROCESSING_EXCHANGE:memesee.media}
+        name: ${CONTENT_MEDIA_PROCESSING_QUEUE:memesee.media.variant-processing}
+        routing-key: ${CONTENT_MEDIA_PROCESSING_ROUTING_KEY:media.variant.process}
+        dead-letter-exchange: ${CONTENT_MEDIA_PROCESSING_DLX:memesee.media.dlx}
+        dead-letter-name: ${CONTENT_MEDIA_PROCESSING_DLQ:memesee.media.variant-processing.dlq}
+        dead-letter-routing-key: ${CONTENT_MEDIA_PROCESSING_DLQ_ROUTING_KEY:media.variant.process.dead}
+        max-attempts: ${CONTENT_MEDIA_PROCESSING_MAX_ATTEMPTS:3}
+        initial-interval-ms: ${CONTENT_MEDIA_PROCESSING_RETRY_INITIAL_MS:1000}
+        multiplier: ${CONTENT_MEDIA_PROCESSING_RETRY_MULTIPLIER:2.0}
+        max-interval-ms: ${CONTENT_MEDIA_PROCESSING_RETRY_MAX_MS:10000}
+    storage:
+      minio:
+        endpoint: ${CONTENT_MEDIA_MINIO_ENDPOINT:http://127.0.0.1:9000}
+        access-key: ${CONTENT_MEDIA_MINIO_ACCESS_KEY:minioadmin}
+        secret-key: ${CONTENT_MEDIA_MINIO_SECRET_KEY:minioadmin}
+        bucket-name: ${CONTENT_MEDIA_MINIO_BUCKET:memesee-post-images}
+        auto-create-bucket: ${CONTENT_MEDIA_MINIO_AUTO_CREATE_BUCKET:true}
+        direct-delivery-enabled: ${CONTENT_MEDIA_DIRECT_DELIVERY_ENABLED:false}
+        public-base-url: ${CONTENT_MEDIA_PUBLIC_BASE_URL:}
+    upload:
+      max-file-size-bytes: ${CONTENT_MEDIA_MAX_BYTES:20971520}
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level content-service [%thread] requestId=%X{requestId:-none} traceId=%X{traceId:-none} %logger{36} - %msg%n"
+  level:
+    org.hibernate.SQL: WARN
+    org.hibernate.orm.jdbc.bind: WARN
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  tracing:
+    enabled: ${MANAGEMENT_TRACING_ENABLED:true}
+    sampling:
+      probability: ${MANAGEMENT_TRACING_SAMPLING_PROBABILITY:0.1}
+  otlp:
+    tracing:
+      endpoint: ${MANAGEMENT_OTLP_TRACING_ENDPOINT:http://localhost:4318/v1/traces}
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      slo:
+        http.server.requests: 50ms,100ms,250ms,500ms,1s,2s,5s
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus

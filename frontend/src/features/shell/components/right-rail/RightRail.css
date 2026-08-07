@@ -1,0 +1,177 @@
+/* Right Rail */
+.side-gauge-card {
+  --side-gauge-ink: #2f241b;
+  --side-gauge-muted: rgba(47, 36, 27, 0.62);
+  --side-gauge-paper: #fff9df;
+  --side-gauge-paper-soft: #fffdf0;
+  --side-gauge-line: rgba(47, 36, 27, 0.52);
+  --side-gauge-teal: #1a9a9b;
+  --side-gauge-teal-deep: #147a7d;
+  --side-gauge-track: #efe4bd;
+  --side-gauge-red: #ad3b32;
+  display: grid;
+  place-items: center;
+  padding: 12px 6px 16px;
+  position: relative;
+  isolation: isolate;
+}
+
+.side-gauge-card::before {
+  content: "";
+  position: absolute;
+  inset: 12px 26px 18px;
+  border-radius: 999px 32px 999px 28px;
+  background: rgba(255, 226, 97, 0.18);
+  transform: rotate(-4deg);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.side-gauge-trigger {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  display: grid;
+  justify-items: center;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+}
+
+.side-gauge-trigger .side-level-gauge {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.side-gauge-trigger:hover .side-level-gauge {
+  transform: translateY(-1px);
+  box-shadow:
+    4px 5px 0 rgba(47, 36, 27, 0.14),
+    0 10px 20px rgba(0, 126, 128, 0.08);
+}
+
+.side-gauge-trigger.active .side-level-gauge {
+  background:
+    radial-gradient(circle at center, var(--side-gauge-paper-soft) 55%, transparent 56%),
+    conic-gradient(var(--side-gauge-teal-deep) 0 var(--progress), var(--side-gauge-track) var(--progress) 100%);
+}
+
+.side-gauge-trigger.has-notify .side-level-gauge {
+  border-color: rgba(122, 31, 27, 0.74);
+}
+
+.side-gauge-trigger.has-notify .side-level-gauge::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border: 2px dashed rgba(173, 59, 50, 0.68);
+  border-radius: 50%;
+  opacity: 0;
+  animation: gauge-notify-ring 1.6s ease-out infinite;
+  pointer-events: none;
+}
+
+.side-level-gauge {
+  --progress: 0%;
+  width: 168px;
+  height: 168px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, var(--side-gauge-paper-soft) 55%, transparent 56%),
+    conic-gradient(var(--side-gauge-teal) 0 var(--progress), var(--side-gauge-track) var(--progress) 100%);
+  border: 2px solid var(--side-gauge-line);
+  box-shadow:
+    3px 4px 0 rgba(47, 36, 27, 0.12),
+    0 10px 20px rgba(0, 126, 128, 0.06);
+  display: grid;
+  place-items: center;
+  position: relative;
+  color: var(--side-gauge-ink);
+  overflow: visible;
+}
+
+.side-level-gauge::before {
+  content: "";
+  position: absolute;
+  inset: 13px;
+  border: 1px solid rgba(47, 36, 27, 0.18);
+  border-radius: 50%;
+  background:
+    linear-gradient(105deg, rgba(255, 255, 255, 0.46), transparent 42%),
+    rgba(255, 249, 223, 0.32);
+  pointer-events: none;
+}
+
+.side-gauge-unread {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  min-width: 24px;
+  padding: 1px 6px;
+  border: 2px solid rgba(47, 36, 27, 0.64);
+  border-radius: 999px;
+  background: var(--side-gauge-red);
+  color: #fff;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  font-weight: 800;
+  text-align: center;
+  box-shadow: 2px 2px 0 rgba(47, 36, 27, 0.16);
+  z-index: 2;
+}
+
+.side-level-gauge-inner {
+  display: grid;
+  place-items: center;
+  gap: 3px;
+  position: relative;
+  z-index: 1;
+}
+
+.side-level-gauge-inner strong {
+  font-size: 1.28rem;
+  line-height: 1;
+}
+
+.side-level-gauge-inner span {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--side-gauge-muted);
+}
+
+.side-gauge-level {
+  font-size: 1.34rem;
+  letter-spacing: 0.1px;
+  text-shadow: 1px 1px 0 rgba(255, 247, 215, 0.72);
+}
+
+.side-gauge-caption {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--side-gauge-ink);
+  letter-spacing: 0.1px;
+}
+
+.side-level-gauge-meta {
+  margin: 0;
+  font-size: 0.76rem;
+  font-style: normal;
+  color: var(--side-gauge-teal-deep);
+  font-weight: 800;
+}
+
+@keyframes gauge-notify-ring {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.94);
+  }
+  70% {
+    opacity: 0;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.08);
+  }
+}

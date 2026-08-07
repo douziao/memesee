@@ -1,0 +1,128 @@
+name: Quality Gate
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Build and test backend
+        working-directory: backend
+        run: mvn test
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Run frontend quality gate
+        working-directory: frontend
+        run: npm run quality
+      - name: Verify frontend production container runtime
+        shell: pwsh
+        run: ./scripts/verify-frontend-container-runtime.ps1 -PullBaseImages
+
+  media-worker:
+    name: Media Worker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: media-worker/package-lock.json
+      - name: Install media worker dependencies
+        working-directory: media-worker
+        run: npm ci
+      - name: Check media worker syntax
+        working-directory: media-worker
+        run: npm run check
+      - name: Test media worker utilities
+        working-directory: media-worker
+        run: npm run test
+      - name: Audit media worker dependencies
+        working-directory: media-worker
+        run: npm audit --omit=dev
+
+  compose:
+    name: Compose Config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate compose files
+        run: |
+          docker compose --env-file .env.example config >/dev/null
+          docker compose --env-file deploy/.env.production.example -f docker-compose.prod.yml config >/dev/null
+      - name: Validate deploy script syntax
+        run: bash -n deploy/deploy.sh
+      - name: Validate PowerShell script syntax
+        shell: pwsh
+        run: |
+          Get-ChildItem scripts -Filter *.ps1 | ForEach-Object {
+            [scriptblock]::Create((Get-Content -Raw $_.FullName)) | Out-Null
+          }
+      - name: Validate observability configuration
+        shell: pwsh
+        run: ./scripts/verify-observability.ps1
+      - name: Validate prometheus configuration
+        shell: pwsh
+        run: ./scripts/verify-prometheus-config.ps1
+      - name: Validate backend runtime configuration
+        shell: pwsh
+        run: ./scripts/verify-backend-runtime-config.ps1
+      - name: Validate architecture phase 1 configuration
+        shell: pwsh
+        run: ./scripts/verify-architecture-phase1.ps1
+      - name: Validate architecture phase 2 configuration
+        shell: pwsh
+        run: ./scripts/verify-architecture-phase2.ps1
+      - name: Validate deploy runtime verification wiring
+        shell: pwsh
+        run: ./scripts/verify-deploy-runtime-config.ps1
+      - name: Validate production env defaults
+        shell: pwsh
+        run: ./scripts/verify-production-env.ps1 -AllowPlaceholders
+      - name: Validate quality gate wiring
+        shell: pwsh
+        run: ./scripts/verify-quality-gate-wiring.ps1
+      - name: Validate frontend nginx configuration
+        shell: pwsh
+        run: ./scripts/verify-frontend-nginx-config.ps1
+      - name: Validate content database index coverage
+        shell: pwsh
+        run: ./scripts/verify-content-db-indexes.ps1
+      - name: Validate content privacy regression contracts
+        shell: pwsh
+        run: ./scripts/verify-content-privacy-regression.ps1
+      - name: Validate production Docker image sources
+        shell: pwsh
+        run: ./scripts/verify-production-image-sources.ps1
+      - name: Validate production container hardening
+        shell: pwsh
+        run: ./scripts/verify-production-container-hardening.ps1
+      - name: Validate production nginx configuration
+        shell: pwsh
+        run: ./scripts/verify-nginx-config.ps1
+      - name: Validate release readiness aggregate wiring
+        shell: pwsh
+        run: ./scripts/verify-release-readiness.ps1 -SkipDockerRuntime -SkipBackendTests -SkipMediaWorkerQuality -SkipFrontendQuality

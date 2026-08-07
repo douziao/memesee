@@ -1,0 +1,97 @@
+.toast {
+  --toast-ink: #2f241b;
+  --toast-paper: #fff7d7;
+  --toast-yellow: #f2d66a;
+  --toast-red: #ad3b32;
+  --toast-teal: #147a7d;
+  position: fixed;
+  top: calc(var(--sticky-offset) + 10px);
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  z-index: 100;
+  width: max-content;
+  min-width: 230px;
+  max-width: min(92vw, 460px);
+  min-height: 44px;
+  padding: 8px 14px 8px 13px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.46), transparent 42%),
+    var(--toast-paper);
+  color: var(--toast-ink);
+  border: 2px solid rgba(47, 36, 27, 0.74);
+  border-radius: 13px;
+  box-shadow:
+    3px 4px 0 rgba(47, 36, 27, 0.16),
+    0 12px 26px rgba(47, 36, 27, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  font-weight: 900;
+  line-height: 1.25;
+  animation: toast-in 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.toast::before {
+  content: "";
+  position: absolute;
+  left: 11px;
+  right: 13px;
+  bottom: 7px;
+  height: 5px;
+  border-radius: 999px 18px 999px 12px;
+  background: rgba(242, 214, 106, 0.58);
+  transform: rotate(-0.5deg);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.toast-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--toast-teal);
+  border: 2px solid rgba(47, 36, 27, 0.74);
+  box-shadow: 2px 2px 0 rgba(47, 36, 27, 0.12);
+  flex: 0 0 auto;
+}
+
+.toast-message {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px) rotate(-0.6deg);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) rotate(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .toast {
+    top: calc(var(--sticky-offset) + 8px);
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    min-width: min(220px, 92vw);
+    max-width: 92vw;
+    min-height: 42px;
+    padding-left: 12px;
+    border-radius: 12px;
+    font-size: 0.84rem;
+  }
+
+  .toast-dot {
+    width: 11px;
+    height: 11px;
+  }
+
+}
