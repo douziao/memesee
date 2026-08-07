@@ -31,7 +31,7 @@ function Assert-Count {
 function Invoke-UpstreamRewriteCase {
   param([string]$SourcePath)
 
-  $tempPath = Join-Path $env:TEMP "memesee-nginx-upstreams-$([guid]::NewGuid().ToString('N')).conf"
+  $tempPath = Join-Path ([System.IO.Path]::GetTempPath()) "memesee-nginx-upstreams-$([guid]::NewGuid().ToString('N')).conf"
   try {
     Copy-Item -LiteralPath $SourcePath -Destination $tempPath -Force
     Set-NginxUpstreams -Path $tempPath -Gateway 18081 -Frontend 13001 -Minio 19002

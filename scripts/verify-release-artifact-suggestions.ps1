@@ -2,13 +2,13 @@ $ErrorActionPreference = "Stop"
 
 function New-TempPath {
   param([string]$Extension)
-  return Join-Path $env:TEMP "memesee-release-artifacts-$([guid]::NewGuid().ToString('N'))$Extension"
+  return Join-Path ([System.IO.Path]::GetTempPath()) "memesee-release-artifacts-$([guid]::NewGuid().ToString('N'))$Extension"
 }
 
 $tempPaths = New-Object System.Collections.Generic.List[string]
 
 try {
-  $artifactDir = Join-Path $env:TEMP "memesee-release-artifacts-$([guid]::NewGuid().ToString('N'))"
+  $artifactDir = Join-Path ([System.IO.Path]::GetTempPath()) "memesee-release-artifacts-$([guid]::NewGuid().ToString('N'))"
   $preflightFile = Join-Path $artifactDir "production-preflight.json"
   $portableArtifactDir = $artifactDir -replace "\\", "/"
   $portablePreflightFile = $preflightFile -replace "\\", "/"

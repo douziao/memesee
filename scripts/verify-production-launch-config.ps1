@@ -24,8 +24,9 @@ function Assert-NotContains {
   }
 }
 
-$envFile = Join-Path $env:TEMP "memesee-launch-config-$([guid]::NewGuid().ToString('N')).env"
-$auditFile = Join-Path $env:TEMP "memesee-launch-config-audit-$([guid]::NewGuid().ToString('N')).json"
+$tempDirectory = [System.IO.Path]::GetTempPath()
+$envFile = Join-Path $tempDirectory "memesee-launch-config-$([guid]::NewGuid().ToString('N')).env"
+$auditFile = Join-Path $tempDirectory "memesee-launch-config-audit-$([guid]::NewGuid().ToString('N')).json"
 
 try {
   @'

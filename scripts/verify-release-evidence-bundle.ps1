@@ -2,7 +2,7 @@ $ErrorActionPreference = "Stop"
 
 function New-TempPath {
   param([string]$Extension)
-  return Join-Path $env:TEMP "memesee-release-evidence-$([guid]::NewGuid().ToString('N'))$Extension"
+  return Join-Path ([System.IO.Path]::GetTempPath()) "memesee-release-evidence-$([guid]::NewGuid().ToString('N'))$Extension"
 }
 
 function Write-JsonArtifact {

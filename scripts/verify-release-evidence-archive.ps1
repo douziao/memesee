@@ -383,7 +383,7 @@ function Invoke-ArchiveVerification {
 }
 
 function New-TempArchivePath {
-  return Join-Path $env:TEMP "memesee-release-archive-$([guid]::NewGuid().ToString('N'))"
+  return Join-Path ([System.IO.Path]::GetTempPath()) "memesee-release-archive-$([guid]::NewGuid().ToString('N'))"
 }
 
 function Write-JsonArtifact {

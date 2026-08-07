@@ -1591,6 +1591,24 @@ function hasExpectedPageMetadata(window, {
     });
 }
 
+function describePageMetadata(window) {
+  return JSON.stringify({
+    title: window.document.title,
+    description: readHeadAttribute(window, 'meta[name="description"]', "content"),
+    canonical: readHeadAttribute(window, 'link[rel="canonical"]', "href"),
+    ogTitle: readHeadAttribute(window, 'meta[property="og:title"]', "content"),
+    ogDescription: readHeadAttribute(window, 'meta[property="og:description"]', "content"),
+    ogUrl: readHeadAttribute(window, 'meta[property="og:url"]', "content"),
+    ogImage: readHeadAttribute(window, 'meta[property="og:image"]', "content"),
+    ogImageAlt: readHeadAttribute(window, 'meta[property="og:image:alt"]', "content"),
+    ogImageWidth: readHeadAttribute(window, 'meta[property="og:image:width"]', "content"),
+    ogImageHeight: readHeadAttribute(window, 'meta[property="og:image:height"]', "content"),
+    twitterTitle: readHeadAttribute(window, 'meta[name="twitter:title"]', "content"),
+    twitterImage: readHeadAttribute(window, 'meta[name="twitter:image"]', "content"),
+    twitterImageAlt: readHeadAttribute(window, 'meta[name="twitter:image:alt"]', "content"),
+  });
+}
+
 function findElementByText(window, selector, expectedText) {
   return [...window.document.querySelectorAll(selector)]
     .find((element) => element.textContent.replace(/\s+/g, " ").trim().includes(expectedText));
@@ -1639,6 +1657,8 @@ class MockXMLHttpRequest {
   static DONE = 4;
 
   constructor() {
+    this.window = globalThis.window;
+    this.pendingRequest = null;
     this.readyState = MockXMLHttpRequest.UNSENT;
     this.status = 0;
     this.statusText = "";
@@ -1694,7 +1714,8 @@ class MockXMLHttpRequest {
 
   send(body = "") {
     this.requestBody = body;
-    setTimeout(() => {
+    this.pendingRequest = this.window.setTimeout(() => {
+      this.pendingRequest = null;
       const shouldFail = shouldFailApiRequest(this.url, { method: this.method });
       this.status = shouldFail ? 500 : 200;
       this.statusText = shouldFail ? "Internal Server Error" : "OK";
@@ -1716,6 +1737,10 @@ class MockXMLHttpRequest {
   }
 
   abort() {
+    if (this.pendingRequest !== null) {
+      this.window.clearTimeout(this.pendingRequest);
+      this.pendingRequest = null;
+    }
     this.readyState = MockXMLHttpRequest.DONE;
     this.dispatch("abort");
     this.dispatch("loadend");
@@ -2060,20 +2085,24 @@ async function assertPostDetailMetadata(window, {
   expectedImageHeight = DEFAULT_SHARE_IMAGE_HEIGHT,
   label = "post detail metadata",
 } = {}) {
-  await waitForCondition(
-    `${label}: metadata did not update`,
-    () => hasExpectedPageMetadata(window, {
-      expectedTitleText,
-      expectedDescriptionText,
-      expectedCanonicalPath,
-      expectedImageUrl,
-      expectedImageAlt,
-      expectedImageWidth,
-      expectedImageHeight,
-    }),
-    window,
-    10000,
-  );
+  try {
+    await waitForCondition(
+      `${label}: metadata did not update`,
+      () => hasExpectedPageMetadata(window, {
+        expectedTitleText,
+        expectedDescriptionText,
+        expectedCanonicalPath,
+        expectedImageUrl,
+        expectedImageAlt,
+        expectedImageWidth,
+        expectedImageHeight,
+      }),
+      window,
+      5000,
+    );
+  } catch (error) {
+    throw new Error(`${error.message}; metadata=${describePageMetadata(window)}`);
+  }
   if (!window.document.title.includes(expectedTitleText)) {
     throw new Error(`${label}: document title is stale; actual="${window.document.title}"`);
   }
