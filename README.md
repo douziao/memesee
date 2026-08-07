@@ -242,6 +242,17 @@ npm audit --omit=dev
 .\scripts\verify-release-readiness.ps1 -SkipDockerRuntime -SkipBackendTests -SkipMediaWorkerQuality -SkipFrontendQuality
 ```
 
+### 前端性能预算
+
+生产构建将 initial JS gzip 限制为 122 KiB，initial CSS gzip 限制为 16 KiB，并校验
+`AuthModal`、`FloatingActions`、`sharePostLink`、`clipboard`、`ComposerPage`、
+`ProfileCenter`、`PostDetailView`、`MarkdownRenderer`、`ImageLightbox` 和 `RichGallery`
+保持为受预算约束的懒加载 chunk。
+
+内部维护操作通过 `memesee_internal_admin_operation_total` 记录。发布检查使用
+`VerifyInternalAdminMetricDefinitions` 验证指标定义；生产环境可通过
+`DEPLOY_VERIFY_INTERNAL_ADMIN_METRICS` 控制是否要求运行态指标样本。
+
 ## 观测与运行验证
 
 后端三个服务暴露 Actuator `health/info/metrics/prometheus`；media-worker 暴露 `/healthz` 和 `/metrics`。
@@ -320,7 +331,26 @@ Browser -> Nginx :443
 .\scripts\verify-production-preflight.ps1 -EnvFile .env -ReleaseId memesee-YYYY-MM-DD
 ```
 
+### GitHub Actions 与 1Panel
+
+合并到 `main` 前先等待 `Quality Gate` 通过，再创建 `v*` Git Tag。`Publish Images`
+会复用质量门禁，并把五个业务镜像发布到 `ghcr.io/douziao`。1Panel 使用
+`docker-compose.1panel.yml`，在服务器 `.env` 中设置同一个版本：
+
+```dotenv
+MEMESEE_IMAGE_REGISTRY=ghcr.io/douziao
+MEMESEE_VERSION=v0.1.0
+```
+
+服务器部署目录仍需保留 `db/init/`、`deploy/otel-collector.yml` 和
+`deploy/prometheus/`，因为基础设施容器会只读挂载这些配置。发布新版本或回滚时，
+修改 `MEMESEE_VERSION` 后在 1Panel 中执行拉取镜像并重建即可；生产环境不使用
+浮动的 `latest` 标签。
+
 蓝绿部署、回滚、发布证据包和 post-launch 观察窗口相关脚本位于 `scripts/`，架构说明见：
+
+发布预检建议把审计和验证结果写入 `deploy/release-artifacts/<release-id>/`。这些文件可能
+包含生产运行证据，`do not commit these artifacts`；该目录已由 `.gitignore` 排除。
 
 - [docs/architecture-phase-1.md](docs/architecture-phase-1.md)
 - [docs/architecture-phase-2.md](docs/architecture-phase-2.md)

@@ -4151,7 +4151,7 @@ async function assertTargetSubPostShareCopiesPermalink({ window, subPost, label 
     `${label}: clipboard text did not include target permalink context`,
     () => Boolean(findCopiedTextEntry(window, [
       `${samplePost.title} · @${targetAuthor} 的子帖`,
-      `定位到子帖 #${subPostId}`,
+      `定位到 @${targetAuthor} 的子帖 #${subPostId}`,
       subPost.content,
       `来自 MemeSee · ${samplePost.communityName} · @${samplePost.authorUsername}`,
       `${TEST_ORIGIN}/posts/${samplePost.id}?subPost=${subPostId}`,
@@ -4160,7 +4160,7 @@ async function assertTargetSubPostShareCopiesPermalink({ window, subPost, label 
   );
   const copiedText = assertCopiedTextContains(window, [
     `${samplePost.title} · @${targetAuthor} 的子帖`,
-    `定位到子帖 #${subPostId}`,
+    `定位到 @${targetAuthor} 的子帖 #${subPostId}`,
     subPost.content,
     `来自 MemeSee · ${samplePost.communityName} · @${samplePost.authorUsername}`,
     `${TEST_ORIGIN}/posts/${samplePost.id}?subPost=${subPostId}`,

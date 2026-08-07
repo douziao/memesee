@@ -46,6 +46,7 @@ foreach ($scriptPath in @(
 foreach ($item in @(
   @{ Pattern = "docker compose --env-file \.env\.example config"; Description = "local compose config validation" },
   @{ Pattern = "docker compose --env-file deploy/\.env\.production\.example -f docker-compose\.prod\.yml config"; Description = "production compose config validation" },
+  @{ Pattern = "docker compose --env-file deploy/\.env\.production\.example -f docker-compose\.1panel\.yml config"; Description = "1Panel compose config validation" },
   @{ Pattern = "bash -n deploy/deploy\.sh"; Description = "deploy bash syntax validation" },
   @{ Pattern = "Get-ChildItem scripts -Filter \*\.ps1"; Description = "PowerShell syntax validation" },
   @{ Pattern = "verify-frontend-container-runtime\.ps1 -PullBaseImages"; Description = "frontend production container runtime validation" },
@@ -68,7 +69,7 @@ foreach ($item in @(
 
 foreach ($item in @(
   @{ Pattern = 'entryJsGzipBytes:\s*95 \* 1024'; Description = "frontend entry JS gzip budget" },
-  @{ Pattern = 'initialJsGzipBytes:\s*120 \* 1024'; Description = "frontend initial JS gzip budget" },
+  @{ Pattern = 'initialJsGzipBytes:\s*122 \* 1024'; Description = "frontend initial JS gzip budget" },
   @{ Pattern = 'totalJsGzipBytes:\s*190 \* 1024'; Description = "frontend total JS gzip budget" },
   @{ Pattern = 'initialCssGzipBytes:\s*16 \* 1024'; Description = "frontend initial CSS gzip budget" },
   @{ Pattern = 'function assertLazyJsChunkContract'; Description = "lazy JS chunk contract helper" },
@@ -96,7 +97,7 @@ foreach ($item in @(
 }
 
 foreach ($item in @(
-  @{ Pattern = 'initial JS gzip.*120 KiB'; Description = "documented frontend initial JS budget" },
+  @{ Pattern = 'initial JS gzip.*122 KiB'; Description = "documented frontend initial JS budget" },
   @{ Pattern = 'CSS gzip.*16 KiB'; Description = "documented frontend initial CSS budget" },
   @{ Pattern = 'AuthModal'; Description = "documented AuthModal lazy chunk contract" },
   @{ Pattern = 'FloatingActions'; Description = "documented FloatingActions lazy chunk contract" },

@@ -1,6 +1,8 @@
 name: Quality Gate
 
 on:
+  workflow_call:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -11,8 +13,8 @@ jobs:
     name: Backend
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "21"
@@ -25,8 +27,8 @@ jobs:
     name: Frontend
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: "22"
           cache: npm
@@ -45,8 +47,8 @@ jobs:
     name: Media Worker
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: "22"
           cache: npm
@@ -68,11 +70,12 @@ jobs:
     name: Compose Config
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Validate compose files
         run: |
           docker compose --env-file .env.example config >/dev/null
           docker compose --env-file deploy/.env.production.example -f docker-compose.prod.yml config >/dev/null
+          docker compose --env-file deploy/.env.production.example -f docker-compose.1panel.yml config >/dev/null
       - name: Validate deploy script syntax
         run: bash -n deploy/deploy.sh
       - name: Validate PowerShell script syntax

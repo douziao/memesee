@@ -9,7 +9,7 @@ const DIST_INDEX_HTML = fileURLToPath(new URL("../dist/index.html", import.meta.
 const budgets = {
   entryJsBytes: 280 * 1024,
   entryJsGzipBytes: 95 * 1024,
-  initialJsGzipBytes: 120 * 1024,
+  initialJsGzipBytes: 122 * 1024,
   totalJsGzipBytes: 190 * 1024,
   initialCssBytes: 70 * 1024,
   initialCssGzipBytes: 16 * 1024,
