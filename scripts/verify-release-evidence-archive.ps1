@@ -7,6 +7,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$script:PowerShellExecutable = if (Get-Command powershell -ErrorAction SilentlyContinue) { "powershell" } else { "pwsh" }
 
 function ConvertTo-Sha256Hex {
   param([string]$Value)
@@ -505,7 +506,7 @@ function Invoke-SelfTest {
     if ($planPayload.Status -ne "OK" -or [bool]$planPayload.Bundle.OperationalComplete -or $planPayload.Summary.PlanOnly -lt 2) {
       throw "archive verification should report plan-only archives without failing by default"
     }
-    $requiredPlanOutput = powershell -NoProfile -ExecutionPolicy Bypass -File $PSCommandPath -ArtifactDir $planDir -ReleaseId "archive-test" -RequireOperationalComplete 2>$null
+    $requiredPlanOutput = & $script:PowerShellExecutable -NoProfile -ExecutionPolicy Bypass -File $PSCommandPath -ArtifactDir $planDir -ReleaseId "archive-test" -RequireOperationalComplete 2>$null
     if ($LASTEXITCODE -eq 0) {
       throw "archive verification must fail plan-only archives when operational completion is required"
     }
@@ -522,7 +523,7 @@ function Invoke-SelfTest {
       AuditSchemaVersion = 1
       Status = "FAILED"
     })
-    $tamperOutput = powershell -NoProfile -ExecutionPolicy Bypass -File $PSCommandPath -ArtifactDir $copyDir -ReleaseId "archive-test" 2>$null
+    $tamperOutput = & $script:PowerShellExecutable -NoProfile -ExecutionPolicy Bypass -File $PSCommandPath -ArtifactDir $copyDir -ReleaseId "archive-test" 2>$null
     if ($LASTEXITCODE -eq 0) {
       throw "archive verification must fail after an archived artifact changes"
     }
