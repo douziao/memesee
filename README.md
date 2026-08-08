@@ -311,6 +311,10 @@ npm audit --omit=dev
 
 1. 在 GitHub Actions 的 `Publish Images` 成功后，确认使用一个已发布版本（当前为 `v0.1.1`）。该版本同时提供 `linux/amd64` 和 `linux/arm64` manifest。
 2. 在 1Panel 新建编排，上传仓库中的 `docker-compose.1panel.yml`、`db/init/01-init.sh`、`deploy/otel-collector.yml`、`deploy/prometheus/` 目录。Compose 文件所在目录应作为编排工作目录，保证相对路径挂载有效。
+
+`db/init/01-init.sh` 不需要在 Ubuntu 主机上手动运行。它会以只读方式挂载到 MySQL 容器的 `/docker-entrypoint-initdb.d/`，由官方 MySQL 镜像内的 Bash 在**首次创建空数据卷**时自动执行，负责创建 `memesee_user`、`memesee_content` 数据库和应用账号。ARM64 主机使用的 `mysql:8.4` 镜像包含对应架构支持，脚本与 CPU 架构无关。
+
+如果 MySQL 数据卷已经存在，官方入口不会再次执行初始化脚本；这可以保护线上数据。只有在确认不需要旧数据时，才删除对应 Docker 卷后重新初始化，切勿把这一步作为普通升级操作。
 3. 复制 `.env.example`（或 `deploy/.env.production.example`）为该编排的 `.env`，至少修改所有 `replace-with-*` 密钥、`FRONTEND_ORIGIN`、`CONTENT_MEDIA_PUBLIC_BASE_URL`，并确认：
 
 ```dotenv
