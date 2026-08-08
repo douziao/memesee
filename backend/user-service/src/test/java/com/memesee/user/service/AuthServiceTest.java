@@ -13,10 +13,14 @@ import com.memesee.platform.error.ApiException;
 import com.memesee.user.dto.AuthResponse;
 import com.memesee.user.dto.LoginRequest;
 import com.memesee.user.dto.RegisterRequest;
+import com.memesee.user.entity.InviteCode;
 import com.memesee.user.entity.User;
+import com.memesee.user.repository.InviteCodeRepository;
 import com.memesee.user.repository.UserRepository;
 import com.memesee.user.security.JwtService;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.lang.reflect.Field;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -26,10 +30,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 class AuthServiceTest {
 
     private final UserRepository userRepository = mock(UserRepository.class);
+    private final InviteCodeRepository inviteCodeRepository = mock(InviteCodeRepository.class);
     private final RecordingJwtService jwtService = new RecordingJwtService();
     private final PasswordEncoder passwordEncoder = mock(PasswordEncoder.class);
     private final AuthService authService = new AuthService(
             userRepository,
+            inviteCodeRepository,
             jwtService,
             null,
             null,
@@ -37,13 +43,16 @@ class AuthServiceTest {
     );
 
     @Test
-    void registerNormalizesInputHashesPasswordAndReturnsTokenWithoutInvite() {
+    void registerNormalizesInputHashesPasswordConsumesInviteAndReturnsToken() {
+        InviteCode inviteCode = inviteCode(2, 0, false, Instant.now().plus(1, ChronoUnit.DAYS));
         when(userRepository.existsByUsername("alice")).thenReturn(false);
+        when(inviteCodeRepository.findByCodeForUpdate("LAUNCH")).thenReturn(Optional.of(inviteCode));
         when(passwordEncoder.encode("plain-password")).thenReturn("encoded-password");
 
         AuthResponse response = authService.register(new RegisterRequest(
                 "  alice  ",
-                "plain-password"
+                "plain-password",
+                " launch "
         ));
 
         assertThat(response).isEqualTo(new AuthResponse("alice", "jwt-token-for-alice-level-0", 0));
@@ -57,7 +66,9 @@ class AuthServiceTest {
         assertThat(savedUser.getLevel()).isZero();
         assertThat(savedUser.getCreatedAt()).isNotNull();
 
-        assertThat(jwtService.generatedTokens).isEqualTo(1);
+        assertThat(readField(inviteCode, "usedCount", Integer.class)).isEqualTo(1);
+        assertThat(readField(inviteCode, "usedBy", String.class)).isEqualTo("alice");
+        assertThat(readField(inviteCode, "usedAt", Instant.class)).isNotNull();
     }
 
     @Test
@@ -66,12 +77,29 @@ class AuthServiceTest {
 
         assertThatThrownBy(() -> authService.register(new RegisterRequest(
                 " alice ",
-                "plain-password"
+                "plain-password",
+                "launch"
         )))
                 .isInstanceOfSatisfying(ApiException.class, exception -> {
                     assertThat(exception.getStatus()).isEqualTo(HttpStatus.CONFLICT);
                     assertThat(exception.getCode()).isEqualTo(ApiErrorCode.CONFLICT);
                 });
+
+        verify(userRepository, never()).save(org.mockito.ArgumentMatchers.any(User.class));
+        verifyNoInteractions(passwordEncoder);
+        assertThat(jwtService.generatedTokens).isZero();
+    }
+
+    @Test
+    void registerRejectsInvalidInviteWithoutSavingUser() {
+        when(userRepository.existsByUsername("alice")).thenReturn(false);
+        when(inviteCodeRepository.findByCodeForUpdate("BADCODE")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.register(new RegisterRequest(
+                "alice",
+                "plain-password",
+                " badcode "
+        ))).isInstanceOf(ApiException.class);
 
         verify(userRepository, never()).save(org.mockito.ArgumentMatchers.any(User.class));
         verifyNoInteractions(passwordEncoder);
@@ -102,6 +130,36 @@ class AuthServiceTest {
                 });
 
         assertThat(jwtService.generatedTokens).isZero();
+    }
+
+    private InviteCode inviteCode(int maxUses, int usedCount, boolean disabled, Instant expiresAt) {
+        InviteCode inviteCode = new InviteCode();
+        writeField(inviteCode, "maxUses", maxUses);
+        writeField(inviteCode, "usedCount", usedCount);
+        writeField(inviteCode, "disabled", disabled);
+        writeField(inviteCode, "expiresAt", expiresAt);
+        writeField(inviteCode, "createdAt", Instant.now());
+        return inviteCode;
+    }
+
+    private void writeField(Object target, String fieldName, Object value) {
+        try {
+            Field field = target.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(target, value);
+        } catch (ReflectiveOperationException exception) {
+            throw new AssertionError("Unable to set field " + fieldName, exception);
+        }
+    }
+
+    private <T> T readField(Object target, String fieldName, Class<T> fieldType) {
+        try {
+            Field field = target.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return fieldType.cast(field.get(target));
+        } catch (ReflectiveOperationException exception) {
+            throw new AssertionError("Unable to read field " + fieldName, exception);
+        }
     }
 
     private static class RecordingJwtService extends JwtService {

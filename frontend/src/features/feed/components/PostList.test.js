@@ -100,10 +100,10 @@ describe("buildFeedLoadMoreState", () => {
 });
 
 describe("PostList share action contract", () => {
-  it("passes feed card share actions to every post card", () => {
-    expect(postListSource).toContain("sharePost,");
-    expect(postListSource).toContain("isSharingPost,");
-    expect(postListSource).toContain("sharePost={sharePost}");
-    expect(postListSource).toContain("isSharingPost={isSharingPost}");
+  it("does not render share actions for feed cards", () => {
+    expect(postListSource).not.toContain("sharePost,");
+    expect(postListSource).not.toContain("isSharingPost,");
+    expect(postListSource).not.toContain("sharePost={sharePost}");
+    expect(postListSource).not.toContain("isSharingPost={isSharingPost}");
   });
 });

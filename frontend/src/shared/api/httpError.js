@@ -78,6 +78,10 @@ export function collectHttpErrorMessages(error) {
     : normalizeHttpError(error);
   const candidates = [];
 
+  if (normalizedError.code === "VALIDATION_FAILED") {
+    pushDetailMessages(candidates, normalizedError.details);
+  }
+
   if (typeof payload === "string") {
     candidates.push(payload);
   }
@@ -88,7 +92,9 @@ export function collectHttpErrorMessages(error) {
     if (typeof payload.error === "string") {
       candidates.push(payload.error);
     }
-    pushDetailMessages(candidates, normalizeDetails(payload.details));
+    if (normalizedError.code !== "VALIDATION_FAILED") {
+      pushDetailMessages(candidates, normalizeDetails(payload.details));
+    }
     Object.entries(payload).forEach(([key, value]) => {
       if (
         typeof value === "string"

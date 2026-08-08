@@ -19,6 +19,7 @@ export function useAuthSession({
   const [mode, setMode] = useState("login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
   const [token, setToken] = useState(initialSession.token);
   const [currentUser, setCurrentUser] = useState(initialSession.currentUser);
   const [currentUserLevel, setCurrentUserLevel] = useState(initialSession.currentUserLevel);
@@ -139,12 +140,20 @@ export function useAuthSession({
       setMessage(UI_MESSAGES.usernameRequired);
       return;
     }
+    const normalizedInviteCode = inviteCode.trim().toUpperCase();
+    if (mode === "register" && !normalizedInviteCode) {
+      setMessage(UI_MESSAGES.inviteCodeRequired);
+      return;
+    }
     setAuthing(true);
     try {
       const authRequest = {
         username: normalizedUsername,
         password,
       };
+      if (mode === "register") {
+        authRequest.inviteCode = normalizedInviteCode;
+      }
       const payload = await (mode === "register" ? registerUser : loginUser)(client, authRequest);
       const nextToken = String(payload.token || "");
       const nextUsername = String(payload.username || "");
@@ -160,6 +169,7 @@ export function useAuthSession({
       });
       setUsername(normalizedUsername);
       setPassword("");
+      setInviteCode("");
       setAuthModalOpen(false);
       await refreshLevelProgress(nextToken, { silent: true });
       setMessage(mode === "register" ? UI_MESSAGES.registerSuccess : UI_MESSAGES.loginSuccess);
@@ -193,6 +203,7 @@ export function useAuthSession({
     setCurrentUserLevel(0);
     setLevelProgress(null);
     setPassword("");
+    setInviteCode("");
     clearStoredAuthSession();
     if (openLogin) {
       setMode("login");
@@ -209,6 +220,8 @@ export function useAuthSession({
     setUsername,
     password,
     setPassword,
+    inviteCode,
+    setInviteCode,
     token,
     currentUser,
     currentUserLevel,

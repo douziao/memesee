@@ -7,8 +7,6 @@ export default function HomeFeed({
   retryFeed,
   openPostDetail,
   prefetchMainPostDetail,
-  sharePost,
-  isSharingPost,
   formatTime,
   clampText,
   formatHeatScore,
@@ -27,8 +25,6 @@ export default function HomeFeed({
         retryFeed={retryFeed}
         openPostDetail={openPostDetail}
         prefetchMainPostDetail={prefetchMainPostDetail}
-        sharePost={sharePost}
-        isSharingPost={isSharingPost}
         formatTime={formatTime}
         clampText={clampText}
         formatHeatScore={formatHeatScore}

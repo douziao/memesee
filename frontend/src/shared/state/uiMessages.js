@@ -18,6 +18,7 @@ export const UI_MESSAGES = {
   feedLoadFailed: "信息流加载失败，请稍后重试。",
   reportUnavailable: "举报功能暂未开放。",
   usernameRequired: "请输入用户名。",
+  inviteCodeRequired: "请输入邀请码。",
   registerSuccess: "注册成功。",
   loginSuccess: "登录成功。",
   registerFailed: "注册失败，请稍后重试。",

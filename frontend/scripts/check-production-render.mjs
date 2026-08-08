@@ -26,10 +26,6 @@ const ROUTES = [
     ],
     interactions: [
       {
-        label: "feed share does not open the card",
-        run: assertFeedShareDoesNotNavigate,
-      },
-      {
         label: "home floating actions load after scroll and return to top",
         run: assertHomeFloatingActionsAfterScroll,
       },
@@ -1985,8 +1981,6 @@ function assertAuthModalControls(window, label) {
 function assertHomeMobileControls(window) {
   assertTextIncludes(window, ".post-title", samplePost.title, "home mobile post title");
   assertButtonReady(window, ".post-open-cover", "home mobile open post target");
-  assertButtonReady(window, ".post-card-share-btn", "home mobile share button");
-  assertTextIncludes(window, ".post-card-share-btn", "分享", "home mobile share label");
 }
 
 function assertPostDetailMobileActions(window, options = {}) {
@@ -3974,20 +3968,6 @@ async function assertSignedInSubPostLikeSyncsProfileLibrary(window) {
     window,
   );
   await assertTargetSubPostLocated(window, { expectGuestPrompt: false });
-}
-
-async function assertFeedShareDoesNotNavigate(window) {
-  const beforePath = `${window.location.pathname}${window.location.search}`;
-  clickSelector(window, ".post-card-share-btn", "feed share interaction");
-  await waitForCondition(
-    "feed share interaction: clipboard copy did not run",
-    () => window.__copiedText.some((text) => text.includes(samplePost.title)),
-    window,
-  );
-  const afterPath = `${window.location.pathname}${window.location.search}`;
-  if (afterPath !== beforePath) {
-    throw new Error(`feed share interaction changed route from ${beforePath} to ${afterPath}`);
-  }
 }
 
 async function assertHomeFloatingActionsAfterScroll(window) {

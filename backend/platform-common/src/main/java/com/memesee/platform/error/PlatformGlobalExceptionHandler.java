@@ -31,7 +31,12 @@ public abstract class PlatformGlobalExceptionHandler {
             HttpServletRequest request
     ) {
         Map<String, String> fieldErrors = new LinkedHashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error -> fieldErrors.put(error.getField(), error.getDefaultMessage()));
+        ex.getBindingResult().getFieldErrors().forEach(error -> fieldErrors.put(
+                error.getField(),
+                error.getDefaultMessage() == null || error.getDefaultMessage().isBlank()
+                        ? "请输入有效值。"
+                        : error.getDefaultMessage()
+        ));
         return buildResponse(
                 HttpStatus.BAD_REQUEST,
                 ApiErrorCode.VALIDATION_FAILED,

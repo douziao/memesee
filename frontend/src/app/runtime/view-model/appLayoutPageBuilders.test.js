@@ -7,8 +7,8 @@ const pageBuildersSource = readFileSync(
 );
 
 describe("buildFeedProps share action contract", () => {
-  it("passes main-post share actions into the home feed props", () => {
-    expect(pageBuildersSource).toContain("sharePost: actions.sharePost");
-    expect(pageBuildersSource).toContain("isSharingPost: actions.isSharingPost");
+  it("does not pass the share action into home feed props", () => {
+    expect(pageBuildersSource).not.toContain("sharePost: actions.sharePost");
+    expect(pageBuildersSource).not.toContain("isSharingPost: actions.isSharingPost");
   });
 });

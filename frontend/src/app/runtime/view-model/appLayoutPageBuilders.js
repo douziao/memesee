@@ -20,8 +20,6 @@ export function buildFeedProps(dependencies) {
       retryLoadMorePosts: feed.appendCurrentFeed,
       openPostDetail: actions.openPostDetail,
       prefetchMainPostDetail: actions.prefetchMainPostDetail,
-      sharePost: actions.sharePost,
-      isSharingPost: actions.isSharingPost,
       formatTime: helpers.formatTime,
       clampText: helpers.clampText,
       formatHeatScore: helpers.formatHeatScore,

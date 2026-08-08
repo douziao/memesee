@@ -67,8 +67,6 @@ export default function PostList({
   retryFeed,
   openPostDetail,
   prefetchMainPostDetail,
-  sharePost,
-  isSharingPost,
   formatTime,
   clampText,
   formatHeatScore,
@@ -138,8 +136,6 @@ export default function PostList({
             })}
             openPostDetail={openPostDetail}
             prefetchMainPostDetail={prefetchMainPostDetail}
-            sharePost={sharePost}
-            isSharingPost={isSharingPost}
             formatTime={formatTime}
             clampText={clampText}
             formatHeatScore={formatHeatScore}
