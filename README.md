@@ -319,7 +319,18 @@ MEMESEE_VERSION=v0.1.1
 ```
 
 4. 在 1Panel 中点击“拉取镜像”后“启动/重建”。如果 GHCR 仓库为私有，先在服务器执行 `docker login ghcr.io`，使用具有 `read:packages` 权限的 GitHub PAT；公开镜像无需登录。
-5. 只将 1Panel/OpenResty 对外暴露 80/443，并反向代理到 `127.0.0.1:${FRONTEND_HOST_PORT}`；网关 API 通过前端 Nginx 的 `/api/` 路径访问。MySQL、Redis、RabbitMQ、MinIO、Meilisearch、Prometheus 端口已绑定到 `127.0.0.1`，不要开放到公网。
+5. `FRONTEND_ORIGIN` 和 `CONTENT_MEDIA_PUBLIC_BASE_URL` 不会自动创建反向代理，它们只是应用配置。请在 1Panel 的 OpenResty 网站中手动添加以下路径代理（将端口替换为你的 `.env` 值）：
+
+```nginx
+location /api/    { proxy_pass http://127.0.0.1:18080; }
+location /share/  { proxy_pass http://127.0.0.1:18080; }
+location /media/  { proxy_pass http://127.0.0.1:19000/memesee-post-images/; }
+location /        { proxy_pass http://127.0.0.1:13000; }
+```
+
+在 1Panel 图形界面中可以通过“反向代理”创建这些规则；若界面只允许一个上游，请在“配置文件/自定义 Nginx 配置”中加入上面的 `location`，并保留 `Host`、`X-Real-IP`、`X-Forwarded-*` 请求头。`/api/`、`/share/` 必须放在通用 `/` 规则之前。MySQL、Redis、RabbitMQ、MinIO、Meilisearch、Prometheus 端口已绑定到 `127.0.0.1`，不要开放到公网。
+
+推荐同一域名部署时保持 `VITE_API_BASE=` 为空，浏览器会请求同源 `/api`；因此不需要额外的 API 子域名。
 
 更新或回滚时只需修改 `.env` 中的 `MEMESEE_VERSION`，再次“拉取镜像”并重建；不要使用 `latest`。
 
