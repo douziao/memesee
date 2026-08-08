@@ -6,12 +6,10 @@ export default function AuthModal({
   mode,
   username,
   password,
-  inviteCode,
   authing,
   setMode,
   setUsername,
   setPassword,
-  setInviteCode,
   submitAuth,
   closeAuthModal,
 }) {
@@ -28,7 +26,7 @@ export default function AuthModal({
         <div className="auth-modal-head">
           <div className="auth-modal-title">
             <span className="auth-modal-stamp">MEMESEE</span>
-            <h3>{mode === "register" ? "邀请码注册" : "账号登录"}</h3>
+            <h3>{mode === "register" ? "账号注册" : "账号登录"}</h3>
           </div>
           <button
             type="button"
@@ -87,23 +85,6 @@ export default function AuthModal({
               required
             />
           </label>
-
-          {mode === "register" ? (
-            <label className="auth-field auth-field-invite">
-              <span>邀请码</span>
-              <input
-                placeholder="输入邀请码"
-                value={inviteCode}
-                onChange={(event) => setInviteCode(event.target.value.toUpperCase())}
-                autoCapitalize="characters"
-                autoCorrect="off"
-                spellCheck={false}
-                autoComplete="one-time-code"
-                maxLength={64}
-                required
-              />
-            </label>
-          ) : null}
 
           <button type="submit" className="auth-submit-button" disabled={authing}>
             {authing ? "处理中..." : mode === "register" ? "注册并登录" : "登录"}

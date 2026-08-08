@@ -5,12 +5,10 @@ export function buildAuthModalProps({ shell, auth }) {
     mode: auth.mode,
     username: auth.username,
     password: auth.password,
-    inviteCode: auth.inviteCode,
     authing: auth.authing,
     setMode: auth.setMode,
     setUsername: auth.setUsername,
     setPassword: auth.setPassword,
-    setInviteCode: auth.setInviteCode,
     submitAuth: auth.submitAuth,
     closeAuthModal: auth.closeAuthModal,
   };

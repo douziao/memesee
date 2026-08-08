@@ -220,11 +220,6 @@
     inset 0 -2px 0 rgba(20, 122, 125, 0.12);
 }
 
-.auth-field-invite input {
-  text-transform: uppercase;
-  letter-spacing: 0;
-}
-
 .auth-submit-button {
   min-height: 48px;
   margin-top: 3px;

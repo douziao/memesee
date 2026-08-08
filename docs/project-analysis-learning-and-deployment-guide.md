@@ -14,7 +14,7 @@ Browser -> React/Vite -> Spring Cloud Gateway
 
 - `frontend`：页面、交互、客户端状态和 API 调用。
 - `gateway-service`：统一入口，负责 CORS、超时、重试、熔断和追踪。
-- `user-service`：注册、登录、JWT、邀请码和用户成长。
+- `user-service`：开放注册、登录、JWT 和用户成长。
 - `content-service`：社区、帖子、回复、Feed、互动、通知、搜索和媒体元数据。
 - `media-worker`：消费 RabbitMQ 消息，用 Sharp 生成 WebP 图片变体。
 - Prometheus、Loki、Tempo、Grafana 提供指标、日志和链路追踪。

@@ -52,7 +52,7 @@ memesee/
 
 ## 核心能力
 
-- 用户：邀请码注册、登录、JWT、当前用户、用户成长/活跃度。
+- 用户：开放注册、登录、JWT、当前用户、用户成长/活跃度。
 - 社区：启动时初始化默认社区目录，支持社区详情和社区过滤。
 - 内容：主帖、回复、浏览、热度、最近活动排序、Markdown/媒体展示。
 - 互动：主帖/回复点赞、收藏、个人互动列表。
@@ -162,18 +162,9 @@ http://localhost:5173
 npm run dev:lan
 ```
 
-## 本地注册邀请码
+## 本地注册
 
-注册接口要求邀请码。开发环境可手动插入一条：
-
-```sql
-INSERT INTO invite_codes
-  (code, max_uses, used_count, disabled, expires_at, created_at, used_at, used_by)
-VALUES
-  ('MEMESEE', 100, 0, false, NULL, UTC_TIMESTAMP(6), NULL, NULL);
-```
-
-前端注册时使用 `MEMESEE`。
+当前版本开放注册。前端切换到“注册”后填写用户名和密码即可创建账号并自动登录，不需要邀请码。
 
 ## 常用接口
 
