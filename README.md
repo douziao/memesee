@@ -303,7 +303,29 @@ npm audit --omit=dev
 
 ## 生产部署
 
-生产部署推荐使用 `docker-compose.prod.yml` 和 `deploy/deploy.sh`。典型流程：
+生产部署有两种方式：Ubuntu ARM64/AMD64 + 1Panel 推荐直接使用已经发布的多架构镜像；需要服务器本地构建或自动安装 Nginx 时，再使用 `docker-compose.prod.yml` 和 `deploy/deploy.sh`。
+
+### 1Panel 部署（推荐）
+
+不需要在服务器上 `git clone`，也不需要手动创建每个容器。1Panel 的编排会按 Compose 文件自动创建基础设施和业务容器，业务镜像从 GHCR 拉取。
+
+1. 在 GitHub Actions 的 `Publish Images` 成功后，确认使用一个已发布版本（当前为 `v0.1.1`）。该版本同时提供 `linux/amd64` 和 `linux/arm64` manifest。
+2. 在 1Panel 新建编排，上传仓库中的 `docker-compose.1panel.yml`、`db/init/01-init.sh`、`deploy/otel-collector.yml`、`deploy/prometheus/` 目录。Compose 文件所在目录应作为编排工作目录，保证相对路径挂载有效。
+3. 复制 `.env.example`（或 `deploy/.env.production.example`）为该编排的 `.env`，至少修改所有 `replace-with-*` 密钥、`FRONTEND_ORIGIN`、`CONTENT_MEDIA_PUBLIC_BASE_URL`，并确认：
+
+```dotenv
+MEMESEE_IMAGE_REGISTRY=ghcr.io/douziao
+MEMESEE_VERSION=v0.1.1
+```
+
+4. 在 1Panel 中点击“拉取镜像”后“启动/重建”。如果 GHCR 仓库为私有，先在服务器执行 `docker login ghcr.io`，使用具有 `read:packages` 权限的 GitHub PAT；公开镜像无需登录。
+5. 只将 1Panel/OpenResty 对外暴露 80/443，并反向代理到 `127.0.0.1:${FRONTEND_HOST_PORT}`；网关 API 通过前端 Nginx 的 `/api/` 路径访问。MySQL、Redis、RabbitMQ、MinIO、Meilisearch、Prometheus 端口已绑定到 `127.0.0.1`，不要开放到公网。
+
+更新或回滚时只需修改 `.env` 中的 `MEMESEE_VERSION`，再次“拉取镜像”并重建；不要使用 `latest`。
+
+### 本地构建部署
+
+需要服务器本地构建时才执行以下流程：
 
 ```bash
 cd /opt
@@ -331,7 +353,7 @@ Browser -> Nginx :443
 .\scripts\verify-production-preflight.ps1 -EnvFile .env -ReleaseId memesee-YYYY-MM-DD
 ```
 
-### GitHub Actions 与 1Panel
+### GitHub Actions 与镜像发布
 
 合并到 `main` 前先等待 `Quality Gate` 通过，再创建 `v*` Git Tag。`Publish Images`
 会复用质量门禁，并把五个业务镜像发布到 `ghcr.io/douziao`。1Panel 使用
@@ -339,14 +361,12 @@ Browser -> Nginx :443
 
 ```dotenv
 MEMESEE_IMAGE_REGISTRY=ghcr.io/douziao
-MEMESEE_VERSION=v0.1.0
+MEMESEE_VERSION=v0.1.1
 ```
 
 服务器部署目录仍需保留 `db/init/`、`deploy/otel-collector.yml` 和
-`deploy/prometheus/`，因为基础设施容器会只读挂载这些配置。发布新版本或回滚时，
-修改 `MEMESEE_VERSION` 后在 1Panel 中执行拉取镜像并重建即可；生产环境不使用
-浮动的 `latest` 标签。发布工作流同时生成 `linux/amd64` 和 `linux/arm64` 镜像，ARM64
-服务器应使用包含多架构 manifest 的版本标签。
+`deploy/prometheus/`，因为基础设施容器会只读挂载这些配置。发布工作流同时生成
+`linux/amd64` 和 `linux/arm64` 镜像，ARM64 服务器必须使用包含多架构 manifest 的版本标签。
 
 蓝绿部署、回滚、发布证据包和 post-launch 观察窗口相关脚本位于 `scripts/`，架构说明见：
 
